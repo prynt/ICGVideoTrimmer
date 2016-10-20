@@ -86,11 +86,16 @@
     [self tapOnVideoLayer:tap];
     
     // set properties for trimmer view
-    [self.trimmerView setThemeColor:[UIColor lightGrayColor]];
+    [self.trimmerView setThemeColor:[UIColor orangeColor]];
     [self.trimmerView setAsset:self.asset];
-    [self.trimmerView setShowsRulerView:YES];
+    [self.trimmerView setShowsRulerView:NO];
     [self.trimmerView setTrackerColor:[UIColor cyanColor]];
     [self.trimmerView setDelegate:self];
+    [self.trimmerView setMaxLength: 10];
+    [self.trimmerView setMinLength:1.2];
+    [self.trimmerView setBorderWidth:3];
+    [self.trimmerView setThumbWidth: 15];
+    //[self.trimmerView setOverlayColor:[UIColor whiteColor]];
     
     // important: reset subviews
     [self.trimmerView resetSubviews];

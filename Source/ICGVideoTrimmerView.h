@@ -21,6 +21,9 @@ NS_ASSUME_NONNULL_BEGIN
 // Theme color for the trimmer view
 @property (strong, nonatomic) UIColor *themeColor;
 
+// Background color for overlay view
+@property (strong, nonatomic) UIColor *overlayColor;
+    
 // Maximum length for the trimmed video
 @property (assign, nonatomic) CGFloat maxLength;
 

@@ -75,6 +75,11 @@
     return _themeColor ?: [UIColor lightGrayColor];
 }
 
+- (UIColor *)overlayColor
+{
+    return _overlayColor ?: self.backgroundColor;
+}
+
 - (CGFloat)maxLength
 {
     return _maxLength ?: 15;
@@ -103,8 +108,6 @@
 - (void)resetSubviews
 {
     self.clipsToBounds = YES;
-
-    [self setBackgroundColor:[UIColor blackColor]];
 
     [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
     
@@ -162,7 +165,7 @@
     [self.leftOverlayView setUserInteractionEnabled:YES];
     UIPanGestureRecognizer *leftPanGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(moveLeftOverlayView:)];
     [self.leftOverlayView addGestureRecognizer:leftPanGestureRecognizer];
-    [self.leftOverlayView setBackgroundColor:[UIColor colorWithWhite:0 alpha:0.8]];
+    [self.leftOverlayView setBackgroundColor:[self.overlayColor colorWithAlphaComponent:0.8]];
     [self addSubview:self.leftOverlayView];
 
     // add right overlay view
@@ -178,8 +181,11 @@
     [self.rightOverlayView setUserInteractionEnabled:YES];
     UIPanGestureRecognizer *rightPanGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(moveRightOverlayView:)];
     [self.rightOverlayView addGestureRecognizer:rightPanGestureRecognizer];
-    [self.rightOverlayView setBackgroundColor:[UIColor colorWithWhite:0 alpha:0.8]];
+    [self.rightOverlayView setBackgroundColor:[self.overlayColor colorWithAlphaComponent:0.8]];
     [self addSubview:self.rightOverlayView];
+    
+    [self.rightThumbView setBackgroundColor: [UIColor clearColor]];
+    [self.leftThumbView setBackgroundColor: [UIColor clearColor]];
     
     [self updateBorderFrames];
     [self notifyDelegate];
