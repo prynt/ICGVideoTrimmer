@@ -60,6 +60,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)resetSubviews;
 
+-(void)layoutThemeColors;
+
 - (void)seekToTime:(CGFloat)startTime;
 
 - (void)hideTracker:(BOOL)flag;

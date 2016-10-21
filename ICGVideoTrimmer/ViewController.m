@@ -100,6 +100,9 @@
     // important: reset subviews
     [self.trimmerView resetSubviews];
     
+    [self.trimmerView setThemeColor:[UIColor redColor]];
+    [self.trimmerView layoutThemeColors];
+    
     [self.trimButton setHidden:NO];
 }
 

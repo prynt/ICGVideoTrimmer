@@ -191,6 +191,14 @@
     [self notifyDelegate];
 }
 
+- (void)layoutThemeColors
+{
+    [self.topBorder setBackgroundColor:self.themeColor];
+    [self.bottomBorder setBackgroundColor:self.themeColor];
+    [self.leftThumbView setColor:self.themeColor];
+    [self.rightThumbView setColor:self.themeColor];
+}
+
 - (void)updateBorderFrames
 {
     CGFloat height = self.borderWidth;
