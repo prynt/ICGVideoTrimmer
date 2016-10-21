@@ -195,8 +195,28 @@
 {
     [self.topBorder setBackgroundColor:self.themeColor];
     [self.bottomBorder setBackgroundColor:self.themeColor];
-    [self.leftThumbView setColor:self.themeColor];
-    [self.rightThumbView setColor:self.themeColor];
+    
+    [self.leftThumbView removeFromSuperview];
+    [self.rightThumbView removeFromSuperview];
+    
+    CGRect leftThumbFrame = CGRectMake(self.overlayWidth-self.thumbWidth, 0, self.thumbWidth, CGRectGetHeight(self.frameView.frame));
+    if (self.leftThumbImage) {
+        self.leftThumbView = [[ICGThumbView alloc] initWithFrame:leftThumbFrame thumbImage:self.leftThumbImage];
+    } else {
+        self.leftThumbView = [[ICGThumbView alloc] initWithFrame:leftThumbFrame color:self.themeColor right:NO];
+    }
+    [self.leftOverlayView addSubview:self.leftThumbView];
+    
+    if (self.rightThumbImage) {
+        self.rightThumbView = [[ICGThumbView alloc] initWithFrame:CGRectMake(0, 0, self.thumbWidth, CGRectGetHeight(self.frameView.frame)) thumbImage:self.rightThumbImage];
+    } else {
+        self.rightThumbView = [[ICGThumbView alloc] initWithFrame:CGRectMake(0, 0, self.thumbWidth, CGRectGetHeight(self.frameView.frame)) color:self.themeColor right:YES];
+    }
+    [self.rightThumbView.layer setMasksToBounds:YES];
+    [self.rightOverlayView addSubview:self.rightThumbView];
+    
+    [self.rightThumbView setBackgroundColor: [UIColor clearColor]];
+    [self.leftThumbView setBackgroundColor: [UIColor clearColor]];
 }
 
 - (void)updateBorderFrames
