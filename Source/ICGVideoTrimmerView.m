@@ -217,9 +217,6 @@
     [self.leftThumbView.layer setMasksToBounds:YES];
     [self.leftOverlayView addSubview:self.leftThumbView];
     [self.leftOverlayView setUserInteractionEnabled:YES];
-
-    UIPanGestureRecognizer *leftPanGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(moveLeftOverlayView:)];
-    [self.leftOverlayView addGestureRecognizer:leftPanGestureRecognizer];
     [self.leftOverlayView setBackgroundColor:[self.overlayColor colorWithAlphaComponent:0.8]];
 
     [self addSubview:self.leftOverlayView];
@@ -237,7 +234,6 @@
     [self.rightThumbView.layer setMasksToBounds:YES];
     [self.rightOverlayView addSubview:self.rightThumbView];
     [self.rightOverlayView setUserInteractionEnabled:YES];
-
     [self.rightOverlayView setBackgroundColor:[self.overlayColor colorWithAlphaComponent:0.8]];
     [self addSubview:self.rightOverlayView];
 
@@ -246,7 +242,7 @@
 
     UIPanGestureRecognizer *panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(moveOverlayView:)];
     [self addGestureRecognizer:panGestureRecognizer];
-    
+
     [self updateBorderFrames];
     [self notifyDelegateOfDidChange];
 }
