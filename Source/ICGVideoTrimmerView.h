@@ -33,8 +33,11 @@ NS_ASSUME_NONNULL_BEGIN
 // Show ruler view on the trimmer view or not
 @property (assign, nonatomic) BOOL showsRulerView;
 
+// Number of seconds between 
+@property (assign, nonatomic) NSInteger rulerLabelInterval;
+
 // Customize color for tracker
-@property (assign, nonatomic) UIColor *trackerColor;
+@property (strong, nonatomic) UIColor *trackerColor;
 
 // Custom image for the left thumb
 @property (strong, nonatomic, nullable) UIImage *leftThumbImage;
@@ -72,7 +75,9 @@ NS_ASSUME_NONNULL_END
 
 @protocol ICGVideoTrimmerDelegate <NSObject>
 
+@optional
 - (void)trimmerView:(nonnull ICGVideoTrimmerView *)trimmerView didChangeLeftPosition:(CGFloat)startTime rightPosition:(CGFloat)endTime;
+- (void)trimmerViewDidEndEditing:(nonnull ICGVideoTrimmerView *)trimmerView;
 
 @end
 

@@ -32,13 +32,15 @@
 @property (assign, nonatomic) CGFloat startTime;
 @property (assign, nonatomic) CGFloat stopTime;
 
+@property (assign, nonatomic) BOOL restartOnPlay;
+
 @end
 
 @implementation ViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+
     self.tempVideoPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"tmpMov.mov"];
 }
 
@@ -52,12 +54,23 @@
 
 - (void)trimmerView:(ICGVideoTrimmerView *)trimmerView didChangeLeftPosition:(CGFloat)startTime rightPosition:(CGFloat)endTime
 {
+    _restartOnPlay = YES;
+    [self.player pause];
+    self.isPlaying = NO;
+    [self stopPlaybackTimeChecker];
+
+    [self.trimmerView hideTracker:true];
+
     if (startTime != self.startTime) {
         //then it moved the left position, we should rearrange the bar
         [self seekVideoToPos:startTime];
     }
+    else{ // right has changed
+        [self seekVideoToPos:endTime];
+    }
     self.startTime = startTime;
     self.stopTime = endTime;
+
 }
 
 
@@ -68,23 +81,23 @@
     [picker dismissViewControllerAnimated:YES completion:nil];
     NSURL *url = [info objectForKey:UIImagePickerControllerMediaURL];
     self.asset = [AVAsset assetWithURL:url];
-    
+
     AVPlayerItem *item = [AVPlayerItem playerItemWithAsset:self.asset];
-    
+
     self.player = [AVPlayer playerWithPlayerItem:item];
     self.playerLayer = [AVPlayerLayer playerLayerWithPlayer:self.player];
     self.playerLayer.contentsGravity = AVLayerVideoGravityResizeAspect;
     self.player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-    
+
     [self.videoLayer.layer addSublayer:self.playerLayer];
-    
+
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapOnVideoLayer:)];
     [self.videoLayer addGestureRecognizer:tap];
-    
+
     self.videoPlaybackPosition = 0;
 
     [self tapOnVideoLayer:tap];
-    
+
     // set properties for trimmer view
     [self.trimmerView setThemeColor:[UIColor orangeColor]];
     [self.trimmerView setAsset:self.asset];
@@ -96,12 +109,12 @@
     [self.trimmerView setBorderWidth:3];
     [self.trimmerView setThumbWidth: 15];
     //[self.trimmerView setOverlayColor:[UIColor whiteColor]];
-    
+
     // important: reset subviews
     [self.trimmerView resetSubviews];
-    
-    
-    
+
+
+
     [self.trimButton setHidden:NO];
 }
 
@@ -143,47 +156,47 @@
 - (IBAction)trimVideo:(id)sender
 {
     [self deleteTempFile];
-    
+
     NSArray *compatiblePresets = [AVAssetExportSession exportPresetsCompatibleWithAsset:self.asset];
     if ([compatiblePresets containsObject:AVAssetExportPresetMediumQuality]) {
-        
+
         self.exportSession = [[AVAssetExportSession alloc]
                               initWithAsset:self.asset presetName:AVAssetExportPresetPassthrough];
         // Implementation continues.
-        
+
         NSURL *furl = [NSURL fileURLWithPath:self.tempVideoPath];
-        
+
         self.exportSession.outputURL = furl;
         self.exportSession.outputFileType = AVFileTypeQuickTimeMovie;
-        
+
         CMTime start = CMTimeMakeWithSeconds(self.startTime, self.asset.duration.timescale);
         CMTime duration = CMTimeMakeWithSeconds(self.stopTime - self.startTime, self.asset.duration.timescale);
         CMTimeRange range = CMTimeRangeMake(start, duration);
         self.exportSession.timeRange = range;
-        
+
         [self.exportSession exportAsynchronouslyWithCompletionHandler:^{
-            
+
             switch ([self.exportSession status]) {
                 case AVAssetExportSessionStatusFailed:
-                    
+
                     NSLog(@"Export failed: %@", [[self.exportSession error] localizedDescription]);
                     break;
                 case AVAssetExportSessionStatusCancelled:
-                    
+
                     NSLog(@"Export canceled");
                     break;
                 default:
                     NSLog(@"NONE");
                     dispatch_async(dispatch_get_main_queue(), ^{
-                        
+
                         NSURL *movieUrl = [NSURL fileURLWithPath:self.tempVideoPath];
                         UISaveVideoAtPathToSavedPhotosAlbum([movieUrl relativePath], self,@selector(video:didFinishSavingWithError:contextInfo:), nil);
                     });
-                    
+
                     break;
             }
         }];
-        
+
     }
 }
 
@@ -210,6 +223,11 @@
         [self.player pause];
         [self stopPlaybackTimeChecker];
     }else {
+        if (_restartOnPlay){
+            [self seekVideoToPos: self.startTime];
+            [self.trimmerView seekToTime:self.startTime];
+            _restartOnPlay = NO;
+        }
         [self.player play];
         [self startPlaybackTimeChecker];
     }
@@ -220,7 +238,7 @@
 - (void)startPlaybackTimeChecker
 {
     [self stopPlaybackTimeChecker];
-    
+
     self.playbackTimeCheckerTimer = [NSTimer scheduledTimerWithTimeInterval:0.1f target:self selector:@selector(onPlaybackTimeCheckerTimer) userInfo:nil repeats:YES];
 }
 
@@ -236,10 +254,15 @@
 
 - (void)onPlaybackTimeCheckerTimer
 {
-    self.videoPlaybackPosition = CMTimeGetSeconds([self.player currentTime]);
+    CMTime curTime = [self.player currentTime];
+    Float64 seconds = CMTimeGetSeconds(curTime);
+    if (seconds < 0){
+        seconds = 0; // this happens! dont know why.
+    }
+    self.videoPlaybackPosition = seconds;
 
-    [self.trimmerView seekToTime:CMTimeGetSeconds([self.player currentTime])];
-    
+    [self.trimmerView seekToTime:seconds];
+
     if (self.videoPlaybackPosition >= self.stopTime) {
         self.videoPlaybackPosition = self.startTime;
         [self seekVideoToPos: self.startTime];
@@ -251,6 +274,7 @@
 {
     self.videoPlaybackPosition = pos;
     CMTime time = CMTimeMakeWithSeconds(self.videoPlaybackPosition, self.player.currentTime.timescale);
+    //NSLog(@"seekVideoToPos time:%.2f", CMTimeGetSeconds(time));
     [self.player seekToTime:time toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero];
 }
 
